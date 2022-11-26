@@ -14,9 +14,21 @@ let ravens = [];
 
 class Raven {
   constructor() {
-    this.width = 100;
-    this.height = 50;
-    // just to right of canvas so they fly in
+    // Raven Sprite
+    this.image = new Image();
+    this.image.src = "./images/raven.png";
+    // sprite.width/height = each ACTUAL FRAME size of the raven 
+    this.spriteWidth = 271;  // 1626px / 6
+    this.spriteHeight = 194;
+    // Need to scale the Ravens - Here randomize the size a little bit
+    this.sizeModifier = Math.random() * 0.6 + 0.4;
+    // height/width below is EACH INSTANCE of a Raven 
+    // Multiplication is performant than division 
+    this.width = this.spriteWidth * this.sizeModifier;
+    this.height = this.spriteHeight * this.sizeModifier;
+
+
+    // Spawn Ravens just to right of canvas so they fly in
     this.x = canvas.width;
     // ensure spawns within canvas and not above/below it | btw, () are necessary
     this.y = Math.random() * (canvas.height - this.height);
@@ -29,7 +41,8 @@ class Raven {
     if (this.x < 0 - this.width) this.markedForDeletion = true;
   }
   draw() {
-    ctx.fillRect(this.x, this.y, this.width, this.height);
+    // ctx.strokeRect(this.x, this.y, this.width, this.height);
+    ctx.drawImage(this.image, 0, 0, this.spriteWidth, this.spriteHeight, this.x, this.y, this.width, this.height);
   }
 }
 
