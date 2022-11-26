@@ -29,7 +29,7 @@ class Raven {
 
 const raven = new Raven();
 
-const animate = () => {
+const animate = (timestamp) => {
   ctx.clearRect(0, 0, canvas.width, canvas.height);
   raven.update();
   raven.draw();
