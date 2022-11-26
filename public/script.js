@@ -50,9 +50,9 @@ const animate = (timestamp) => {
   if (timeToNextRaven > ravenInterval) {
     ravens.push(new Raven());
     timeToNextRaven = 0;
+    console.log(ravens);
   }
-
 
   requestAnimationFrame(animate);
 }
-// animate();
+// animate(0); // Passing initial timestamp = 0, to avoid undefined
