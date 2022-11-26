@@ -35,14 +35,23 @@ class Raven {
     this.directionX = Math.random() * 5 + 3;
     this.directionY = Math.random() * 5 - 2.5;
     this.markedForDeletion = false;
+
+    // Animate through raven frames on sprite sheet
+    this.frame = 0;
+    this.maxFrame = 4;
   }
   update() {
     this.x -= this.directionX;
     if (this.x < 0 - this.width) this.markedForDeletion = true;
+    if (this.frame > this.maxFrame) {
+      this.frame = 0;
+    } else {
+      this.frame++;
+    }
   }
   draw() {
     // ctx.strokeRect(this.x, this.y, this.width, this.height);
-    ctx.drawImage(this.image, 0, 0, this.spriteWidth, this.spriteHeight, this.x, this.y, this.width, this.height);
+    ctx.drawImage(this.image, this.frame * this.spriteWidth, 0, this.spriteWidth, this.spriteHeight, this.x, this.y, this.width, this.height);
   }
 }
 
@@ -78,4 +87,4 @@ const animate = (timestamp) => {
 
   requestAnimationFrame(animate);
 };
-// animate(0); // Passing initial timestamp = 0, to avoid undefined
+animate(0); // Passing initial timestamp = 0, to avoid undefined
