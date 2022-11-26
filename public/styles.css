@@ -5,7 +5,7 @@ body {
   overflow: hidden;
 }
 
-canvas {
+canvas1 {
   background: blue;
   position: absolute;
   top: 0;
