@@ -39,15 +39,24 @@ class Raven {
     // Animate through raven frames on sprite sheet
     this.frame = 0;
     this.maxFrame = 4;
+    // Need bird flaps to be consistent across good and bad PCs
+    this.timeSinceFlap = 0;
+    this.flapInterval = 100;
   }
-  update() {
+  update(deltaTime) {
     this.x -= this.directionX;
     if (this.x < 0 - this.width) this.markedForDeletion = true;
-    if (this.frame > this.maxFrame) {
-      this.frame = 0;
-    } else {
-      this.frame++;
+    // Remember, deltaTime is time for computer to serve a new frame
+    this.timeSinceFlap += deltaTime; // Equalizes between good and bad PCs
+    if (this.timeSinceFlap > this.flapInterval) {
+      if (this.frame > this.maxFrame) {
+        this.frame = 0;
+      } else {
+        this.frame++;
+      }
+      this.timeSinceFlap = 0; // must remember to reset it to 0
     }
+
   }
   draw() {
     // ctx.strokeRect(this.x, this.y, this.width, this.height);
@@ -77,7 +86,7 @@ const animate = (timestamp) => {
 
   // ---- Draw, Update & Delete Ravens
   // Using spread here for the future if need to call update() or draw() on multiple sources (ie. powerups, other enemies, etc) can group them all together in 1 spread
-  [...ravens].forEach(raven => raven.update());
+  [...ravens].forEach(raven => raven.update(deltaTime));
   [...ravens].forEach(raven => raven.draw());
 
   // Next, deleting ravens that moved past canvas to not bloat ravens array
