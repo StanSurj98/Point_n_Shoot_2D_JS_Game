@@ -3,8 +3,10 @@ const canvas = document.getElementById("canvas1");
 const ctx = canvas.getContext("2d");
 canvas.width = window.innerWidth;
 canvas.height = window.innerHeight;
-
-// Equalize raven spawn times for good && bad PCs
+// ---- Scores
+let score = 0;
+ctx.font = '50px Impact'; // Global canvas font
+// ---- Equalize Raven Spawn Times /b/ Good & Bad PCs
 let timeToNextRaven = 0; // accumulates time between frames
 let ravenInterval = 500; // when timeToNextRaven matches interval - spawn raven & reset
 let lastTime = 0; // hold value of 'timestamp' from initial loop, constantly changes
@@ -63,7 +65,7 @@ class Raven {
     // ---- Animate Through Frames 
     // !NOTE! "deltaTime" is time for computer to serve a new frame
     this.timeSinceFlap += deltaTime; // Equalizes good and bad PCs
-    
+
     if (this.timeSinceFlap > this.flapInterval) {
       if (this.frame > this.maxFrame) {
         this.frame = 0;
@@ -75,6 +77,7 @@ class Raven {
   }
 
   draw() {
+    ctx.strokeRect(this.x, this.y, this.width, this.height);
     ctx.drawImage(
       this.image,
       this.frame * this.spriteWidth, // Crop start @ each frame && frames increase
@@ -89,8 +92,18 @@ class Raven {
   }
 }
 
+
+function drawScore(){
+  ctx.fillStyle = 'black';
+  ctx.fillText('Score: ' + score, 50, 75);
+  // writing twice here just gives off a shadow effect
+  ctx.fillStyle = 'white';
+  ctx.fillText('Score: ' + score, 54, 78);
+}
+
+
 // "Timestamp" is default JS behavior with reqAnimFrame() func
-const animate = (timestamp) => {
+function animate(timestamp){
   ctx.clearRect(0, 0, canvas.width, canvas.height);
 
   // ---- Spawning Ravens
@@ -106,6 +119,12 @@ const animate = (timestamp) => {
     ravens.push(new Raven());
     timeToNextRaven = 0;
   }
+
+  // ---- Scoreboard
+  // !NOTE! We're on same canvas, so render order matters
+  drawScore();
+
+
 
   // ---- Draw, Update & Delete Ravens
   // Using "spread" here for the future if need to call update() or draw() on multiple sources (ie. powerups, other enemies, etc) can group them all together in 1 spread
