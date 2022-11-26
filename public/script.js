@@ -33,8 +33,10 @@ class Raven {
     this.x = canvas.width;
     // Spawn within canvas, not above/below it | () are necessary here
     this.y = Math.random() * (canvas.height - this.height);
+    // Raven movement speeds
     this.directionX = Math.random() * 5 + 3;
     this.directionY = Math.random() * 5 - 2.5;
+    // Keeps track for when the move past left of screen later
     this.markedForDeletion = false;
 
     // Animate raven frames on sprite sheet
@@ -46,10 +48,22 @@ class Raven {
   }
 
   update(deltaTime) {
+    // If they hit the top or bottom of our canvas, flip their directionY movement
+    if(this.y < 0 || this.y > canvas.height - this.height ) {
+      this.directionY = this.directionY * -1;
+    }
     this.x -= this.directionX;
+    this.y += this.directionY; // Allows some ravens to fly up or down
+
+
+    // When ENTIRE raven width is past the left side, mark delete
     if (this.x < 0 - this.width) this.markedForDeletion = true;
+
+
+    // ---- Animate Through Frames 
     // !NOTE! "deltaTime" is time for computer to serve a new frame
     this.timeSinceFlap += deltaTime; // Equalizes good and bad PCs
+    
     if (this.timeSinceFlap > this.flapInterval) {
       if (this.frame > this.maxFrame) {
         this.frame = 0;
