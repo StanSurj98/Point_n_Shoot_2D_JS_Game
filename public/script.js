@@ -91,8 +91,9 @@ class Raven {
   }
 
   draw() {
-    ctx.fillStyle = this.color;
-    ctx.fillRect(this.x, this.y, this.width, this.height);
+    // Avoid tainted canvas error, draw the "hitboxes" on collision canvas
+    collisionCtx.fillStyle = this.color;
+    collisionCtx.fillRect(this.x, this.y, this.width, this.height);
     ctx.drawImage(
       this.image,
       this.frame * this.spriteWidth, // Crop start @ each frame && frames increase
@@ -116,14 +117,13 @@ function drawScore() {
 }
 
 window.addEventListener("click", function (e) {
-  // We want collision detection by colors
-  // Takes 4 args: where we're scanning and how big, in this case 1:1px
-  const detectPixelColor = ctx.getImageData(e.x, e.y, 1, 1); // Built in ctx func
-  // Study this .getImageData more, it has intricacies
+  // 4 args: where to scan canvas && how big, in this case: at our click && 1x1px
+  const detectPixelColor = ctx.getImageData(e.x, e.y, 1, 1);
+  // Study built-in func "getImageData()" more, it has intricacies
   console.log(detectPixelColor);
 });
 
-// "Timestamp" is default JS behavior with reqAnimFrame() func
+// "Timestamp" = default JS behavior with reqAnimFrame() func
 function animate(timestamp) {
   ctx.clearRect(0, 0, canvas.width, canvas.height);
 
@@ -139,10 +139,17 @@ function animate(timestamp) {
   if (timeToNextRaven > ravenInterval) {
     ravens.push(new Raven());
     timeToNextRaven = 0;
+
+    // ---- "Layering" Ravens by Size
+    ravens.sort((a, b) => {
+      // Sort the array in ascending order based on widths
+      // small appear at back & large at front | drawn based on order in array
+      return a.width - b.width;
+    })
   }
 
   // ---- Scoreboard
-  // !NOTE! We're on same canvas, so render order matters
+  // !NOTE! on same canvas, render order matters
   drawScore();
 
   // ---- Draw, Update & Delete Ravens
