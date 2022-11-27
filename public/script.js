@@ -101,6 +101,14 @@ function drawScore(){
   ctx.fillText('Score: ' + score, 54, 78);
 }
 
+window.addEventListener("click", function(e) {
+  // We want collision detection by colors 
+  // Takes 4 args: where we're scanning and how big, in this case 1:1px 
+  const detectPixelColor = ctx.getImageData(e.x, e.y, 1, 1); // Built in ctx func
+  // Study this .getImageData more, it has intricacies
+  console.log(detectPixelColor);
+})
+
 
 // "Timestamp" is default JS behavior with reqAnimFrame() func
 function animate(timestamp){
