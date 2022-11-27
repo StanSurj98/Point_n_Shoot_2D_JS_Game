@@ -3,9 +3,16 @@ const canvas = document.getElementById("canvas1");
 const ctx = canvas.getContext("2d");
 canvas.width = window.innerWidth;
 canvas.height = window.innerHeight;
+
+// ---- Collision Canvas ----
+const collisionCanvas = document.getElementById("collisionCanvas");
+const collisionCtx = collisionCanvas.getContext("2d");
+collisionCanvas.width = window.innerWidth;
+collisionCanvas.height = window.innerHeight;
+
 // ---- Scores
 let score = 0;
-ctx.font = '50px Impact'; // Global canvas font
+ctx.font = "50px Impact"; // Global canvas font
 // ---- Equalize Raven Spawn Times /b/ Good & Bad PCs
 let timeToNextRaven = 0; // accumulates time between frames
 let ravenInterval = 500; // when timeToNextRaven matches interval - spawn raven & reset
@@ -47,22 +54,29 @@ class Raven {
     // Equalize Animation for good and bad PCs
     this.timeSinceFlap = 0;
     this.flapInterval = Math.random() * 50 + 50; // Random num between 50-100, each bird
+
+    // On Spawn Ravens get random colors according to [R, G, B] with values == 0-255
+    this.randomColors = [
+      Math.floor(Math.random() * 255),
+      Math.floor(Math.random() * 255),
+      Math.floor(Math.random() * 255),
+    ];
+    // Here the tutorial says to concatenate CSS rgb() string
+    this.color = `rgb( ${this.randomColors[0]} , ${this.randomColors[1]} , ${this.randomColors[2]})`;
   }
 
   update(deltaTime) {
     // If they hit the top or bottom of our canvas, flip their directionY movement
-    if(this.y < 0 || this.y > canvas.height - this.height ) {
+    if (this.y < 0 || this.y > canvas.height - this.height) {
       this.directionY = this.directionY * -1;
     }
     this.x -= this.directionX;
     this.y += this.directionY; // Allows some ravens to fly up or down
 
-
     // When ENTIRE raven width is past the left side, mark delete
     if (this.x < 0 - this.width) this.markedForDeletion = true;
 
-
-    // ---- Animate Through Frames 
+    // ---- Animate Through Frames
     // !NOTE! "deltaTime" is time for computer to serve a new frame
     this.timeSinceFlap += deltaTime; // Equalizes good and bad PCs
 
@@ -77,7 +91,8 @@ class Raven {
   }
 
   draw() {
-    ctx.strokeRect(this.x, this.y, this.width, this.height);
+    ctx.fillStyle = this.color;
+    ctx.fillRect(this.x, this.y, this.width, this.height);
     ctx.drawImage(
       this.image,
       this.frame * this.spriteWidth, // Crop start @ each frame && frames increase
@@ -92,26 +107,24 @@ class Raven {
   }
 }
 
-
-function drawScore(){
-  ctx.fillStyle = 'black';
-  ctx.fillText('Score: ' + score, 50, 75);
+function drawScore() {
+  ctx.fillStyle = "black";
+  ctx.fillText("Score: " + score, 50, 75);
   // writing twice here just gives off a shadow effect
-  ctx.fillStyle = 'white';
-  ctx.fillText('Score: ' + score, 54, 78);
+  ctx.fillStyle = "white";
+  ctx.fillText("Score: " + score, 54, 78);
 }
 
-window.addEventListener("click", function(e) {
-  // We want collision detection by colors 
-  // Takes 4 args: where we're scanning and how big, in this case 1:1px 
+window.addEventListener("click", function (e) {
+  // We want collision detection by colors
+  // Takes 4 args: where we're scanning and how big, in this case 1:1px
   const detectPixelColor = ctx.getImageData(e.x, e.y, 1, 1); // Built in ctx func
   // Study this .getImageData more, it has intricacies
   console.log(detectPixelColor);
-})
-
+});
 
 // "Timestamp" is default JS behavior with reqAnimFrame() func
-function animate(timestamp){
+function animate(timestamp) {
   ctx.clearRect(0, 0, canvas.width, canvas.height);
 
   // ---- Spawning Ravens
@@ -132,8 +145,6 @@ function animate(timestamp){
   // !NOTE! We're on same canvas, so render order matters
   drawScore();
 
-
-
   // ---- Draw, Update & Delete Ravens
   // Using "spread" here for the future if need to call update() or draw() on multiple sources (ie. powerups, other enemies, etc) can group them all together in 1 spread
   [...ravens].forEach((raven) => raven.update(deltaTime));
@@ -144,7 +155,7 @@ function animate(timestamp){
   ravens = ravens.filter((raven) => !raven.markedForDeletion);
 
   requestAnimationFrame(animate);
-};
+}
 
 // Passing initial timestamp = 0, to avoid undefined
-animate(0); 
+animate(0);
