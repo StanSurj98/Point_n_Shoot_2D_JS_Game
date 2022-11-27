@@ -13,6 +13,8 @@ collisionCanvas.height = window.innerHeight;
 // ---- Scores
 let score = 0;
 ctx.font = "50px Impact"; // Global canvas font
+let lives = 5;
+let gameOver = false;
 // ---- Equalize Raven Spawn Times /b/ Good & Bad PCs
 let timeToNextRaven = 0; // accumulates time between frames
 let ravenInterval = 500; // when timeToNextRaven matches interval - spawn raven & reset
@@ -73,8 +75,12 @@ class Raven {
     this.x -= this.directionX;
     this.y += this.directionY; // Allows some ravens to fly up or down
 
-    // When ENTIRE raven width is past the left side, mark delete
-    if (this.x < 0 - this.width) this.markedForDeletion = true;
+    // When ENTIRE raven width is past the left side, mark delete & count down lives
+    if (this.x < 0 - this.width) {
+      this.markedForDeletion = true;
+      lives--;
+      if (lives === 0) gameOver = true;
+    }
 
     // ---- Animate Through Frames
     // !NOTE! "deltaTime" is time for computer to serve a new frame
@@ -153,6 +159,7 @@ class Explosions {
   }
 }
 
+// ---- Game Details
 function drawScore() {
   ctx.fillStyle = "black";
   ctx.fillText("Score: " + score, 50, 75);
@@ -160,7 +167,30 @@ function drawScore() {
   ctx.fillStyle = "white";
   ctx.fillText("Score: " + score, 54, 78);
 }
+function drawLives() {
+  ctx.fillStyle = "black";
+  ctx.fillText("Lives: " + lives, 500, 75);
+  // writing twice here just gives off a shadow effect
+  ctx.fillStyle = "white";
+  ctx.fillText("Lives: " + lives, 504, 78);
+}
+function drawGameOver() {
+  ctx.textAlign = "center"; // Else it goes to "top-left" of the text
+  ctx.fillStyle = "black";
+  ctx.fillText(
+    `GAME OVER\n Your Score: ${score}`,
+    canvas.width * 0.5,
+    canvas.height * 0.5
+  );
+  ctx.fillStyle = "white";
+  ctx.fillText(
+    `GAME OVER\n Your Score: ${score}`,
+    canvas.width * 0.5 + 4,
+    canvas.height * 0.5 + 3
+  );
+}
 
+// ---- "Click to Shoot" Event
 window.addEventListener("click", function (e) {
   // 4 args: where to scan canvas && how big, in this case: at our click && 1x1px
   const detectPixelColor = collisionCtx.getImageData(e.x, e.y, 1, 1);
@@ -173,7 +203,7 @@ window.addEventListener("click", function (e) {
       raven.randomColors[1] === pc[1] &&
       raven.randomColors[2] === pc[2]
     ) {
-      // ---- Collision detected
+      // ---- Collision Detected
       raven.markedForDeletion = true;
       score++;
       // Add explosions to array, size & position should depend on raven clicked
@@ -183,8 +213,11 @@ window.addEventListener("click", function (e) {
   });
 });
 
-// "Timestamp" = default JS behavior with reqAnimFrame() func
+// ---- Main Animation Loop ----
 function animate(timestamp) {
+  // 'timestamp' is built in with 'requestAnimationFrame()' function
+
+  // ---- Clear Hitboxes && Ravens
   ctx.clearRect(0, 0, canvas.width, canvas.height);
   collisionCtx.clearRect(0, 0, canvas.width, canvas.height);
 
@@ -212,6 +245,7 @@ function animate(timestamp) {
   // ---- Scoreboard
   // !NOTE! on same canvas, render order matters
   drawScore();
+  drawLives();
 
   // ---- Draw, Update & Delete Ravens
   // Now we see benefit of spread operator here to call both explosions and ravens
@@ -223,7 +257,9 @@ function animate(timestamp) {
   ravens = ravens.filter((raven) => !raven.markedForDeletion);
   explosions = explosions.filter((explosion) => !explosion.markedForDeletion);
 
-  requestAnimationFrame(animate);
+  // Recursion call until gameOver is truthy
+  if (!gameOver) requestAnimationFrame(animate);
+  else drawGameOver();
 }
 
 // Passing initial timestamp = 0, to avoid undefined
