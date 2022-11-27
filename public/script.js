@@ -116,16 +116,28 @@ function drawScore() {
   ctx.fillText("Score: " + score, 54, 78);
 }
 
-window.addEventListener("click", function (e) {
+window.addEventListener("click", function(e) {
   // 4 args: where to scan canvas && how big, in this case: at our click && 1x1px
-  const detectPixelColor = ctx.getImageData(e.x, e.y, 1, 1);
+  const detectPixelColor = collisionCtx.getImageData(e.x, e.y, 1, 1);
   // Study built-in func "getImageData()" more, it has intricacies
-  console.log(detectPixelColor);
+  const pc = detectPixelColor.data;
+  console.log(pc);
+  ravens.forEach((raven) => {
+    if (
+      raven.randomColors[0] === pc[0] &&
+      raven.randomColors[1] === pc[1] &&
+      raven.randomColors[2] === pc[2]
+    ) {
+      raven.markedForDeletion = true;
+      score++;
+    }
+  });
 });
 
 // "Timestamp" = default JS behavior with reqAnimFrame() func
 function animate(timestamp) {
   ctx.clearRect(0, 0, canvas.width, canvas.height);
+  collisionCtx.clearRect(0, 0, canvas.width, canvas.height);
 
   // ---- Spawning Ravens
   // !NOTE! "how fast your computer can serve the next frame"
@@ -145,7 +157,7 @@ function animate(timestamp) {
       // Sort the array in ascending order based on widths
       // small appear at back & large at front | drawn based on order in array
       return a.width - b.width;
-    })
+    });
   }
 
   // ---- Scoreboard
