@@ -108,6 +108,51 @@ class Raven {
   }
 }
 
+// ---- Explosions
+let explosions = [];
+class Explosions {
+  constructor(x, y, size) {
+    this.image = new Image();
+    this.image.src = "./images/boom.png";
+    this.spriteWidth = 200;
+    this.spriteHeight = 179;
+    // Dimension and Position will derive from Raven being clicked
+    this.size = size * 0.65; // Scales based on raven, but even smaller
+    this.x = x;
+    this.y = y;
+    this.frame = 0;
+    this.sound = new Audio();
+    // this.sound.src = './sounds/boom.wav';
+    this.timeSinceLastFrame = 0;
+    this.frameInterval = 75;
+    this.markedForDeletion = false;
+  }
+  update(deltaTime) {
+    if (this.frame === 0) {
+      this.sound.play(); // plays sound on 1st frame
+    }
+    this.timeSinceLastFrame += deltaTime; // similar to raven flap
+    if (this.timeSinceLastFrame > this.frameInterval) {
+      this.frame++; // animates explosions
+      this.timeSinceLastFrame = 0; // !NOTE! must reset this, else only 1st frame affect
+      if (this.frame > 5) this.markedForDeletion = true;
+    }
+  }
+  draw() {
+    ctx.drawImage(
+      this.image,
+      this.frame * this.spriteWidth,
+      0,
+      this.spriteWidth,
+      this.spriteHeight,
+      this.x,
+      this.y,
+      this.size,
+      this.size
+    );
+  }
+}
+
 function drawScore() {
   ctx.fillStyle = "black";
   ctx.fillText("Score: " + score, 50, 75);
@@ -116,7 +161,7 @@ function drawScore() {
   ctx.fillText("Score: " + score, 54, 78);
 }
 
-window.addEventListener("click", function(e) {
+window.addEventListener("click", function (e) {
   // 4 args: where to scan canvas && how big, in this case: at our click && 1x1px
   const detectPixelColor = collisionCtx.getImageData(e.x, e.y, 1, 1);
   // Study built-in func "getImageData()" more, it has intricacies
@@ -128,8 +173,12 @@ window.addEventListener("click", function(e) {
       raven.randomColors[1] === pc[1] &&
       raven.randomColors[2] === pc[2]
     ) {
+      // ---- Collision detected
       raven.markedForDeletion = true;
       score++;
+      // Add explosions to array, size & position should depend on raven clicked
+      explosions.push(new Explosions(raven.x, raven.y, raven.width));
+      // console.log("Explosions being added: ", explosions);
     }
   });
 });
@@ -165,13 +214,14 @@ function animate(timestamp) {
   drawScore();
 
   // ---- Draw, Update & Delete Ravens
-  // Using "spread" here for the future if need to call update() or draw() on multiple sources (ie. powerups, other enemies, etc) can group them all together in 1 spread
-  [...ravens].forEach((raven) => raven.update(deltaTime));
-  [...ravens].forEach((raven) => raven.draw());
+  // Now we see benefit of spread operator here to call both explosions and ravens
+  [...ravens, ...explosions].forEach((object) => object.update(deltaTime));
+  [...ravens, ...explosions].forEach((object) => object.draw());
 
   // Deleting ravens that moved past canvas to not bloat ravens array
   // Re-assign ravens array to new array where ONLY markedForDeletion = false
   ravens = ravens.filter((raven) => !raven.markedForDeletion);
+  explosions = explosions.filter((explosion) => !explosion.markedForDeletion);
 
   requestAnimationFrame(animate);
 }
