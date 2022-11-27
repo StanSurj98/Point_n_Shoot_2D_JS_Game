@@ -79,7 +79,7 @@ class Raven {
     if (this.x < 0 - this.width) {
       this.markedForDeletion = true;
       lives--;
-      if (lives === 0) gameOver = true;
+      if (lives < 0) gameOver = true; // Use "<" here else shows "Lives: 1, Game Over!"
     }
 
     // ---- Animate Through Frames
