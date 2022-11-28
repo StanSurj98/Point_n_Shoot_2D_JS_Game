@@ -128,7 +128,7 @@ class Explosions {
     this.y = y;
     this.frame = 0;
     this.sound = new Audio();
-    // this.sound.src = './sounds/boom.wav';
+    this.sound.src = './sounds/crow_caw.wav';
     this.timeSinceLastFrame = 0;
     this.frameInterval = 75;
     this.markedForDeletion = false;
